@@ -10,7 +10,7 @@ import (
 
 // ObjectWalker iterates through JSON object fields.
 type ObjectWalker interface {
-	Walk(func(name string, value interface{}) error) error
+	Walk(func(name string, value interface{}) (interface{}, error)) error
 	json.Marshaler
 }
 
@@ -25,11 +25,13 @@ type field struct {
 	value interface{}
 }
 
-func (o object) Walk(fn func(name string, value interface{}) error) error {
-	for _, f := range o.fields {
-		if err := fn(f.name, f.value); err != nil {
+func (o *object) Walk(fn func(name string, value interface{}) (interface{}, error)) error {
+	for idx, f := range o.fields {
+		repl, err := fn(f.name, f.value)
+		if err != nil {
 			return err
 		}
+		o.fields[idx].value = repl
 	}
 
 	return nil
@@ -148,7 +150,7 @@ func getObject(l *jlexer.Lexer) (ObjectWalker, error) {
 
 		val, err := parse(l)
 		if err != nil {
-			return obj, errors.Wrap(err, "get object")
+			return &obj, errors.Wrap(err, "get object")
 		}
 
 		field.value = val
@@ -157,7 +159,7 @@ func getObject(l *jlexer.Lexer) (ObjectWalker, error) {
 	}
 	l.Delim('}')
 
-	return obj, l.Error()
+	return &obj, l.Error()
 }
 
 func getArray(l *jlexer.Lexer) (interface{}, error) {
@@ -190,4 +192,16 @@ func getArray(l *jlexer.Lexer) (interface{}, error) {
 func getValue(l *jlexer.Lexer) (Value, error) {
 	raw := l.Raw()
 	return value{raw}, l.Error()
+}
+
+type marshaler struct {
+	v interface{}
+}
+
+func (m *marshaler) MarshalJSON() ([]byte, error) {
+	return json.Marshal(m.v)
+}
+
+func JSONMarshaler(i interface{}) *marshaler {
+	return &marshaler{i}
 }

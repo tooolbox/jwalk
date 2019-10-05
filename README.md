@@ -1,5 +1,5 @@
-[![GoDoc](https://godoc.org/github.com/romanyx/jwalk?status.svg)](https://godoc.org/github.com/romanyx/jwalk)
-[![Go Report Card](https://goreportcard.com/badge/github.com/romanyx/jwalk)](https://goreportcard.com/report/github.com/romanyx/jwalk)
+[![GoDoc](https://godoc.org/github.com/tooolbox/jwalk?status.svg)](https://godoc.org/github.com/tooolbox/jwalk)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tooolbox/jwalk)](https://goreportcard.com/report/github.com/tooolbox/jwalk)
 [![Build Status](https://travis-ci.org/romanyx/jwalk.svg?branch=master)](https://travis-ci.org/romanyx/jwalk)
 
 # jwalk
@@ -15,7 +15,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/romanyx/jwalk"
+	"github.com/tooolbox/jwalk"
 )
 
 const input = `{

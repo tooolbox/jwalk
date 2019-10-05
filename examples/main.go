@@ -1,10 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/romanyx/jwalk"
+	"github.com/tooolbox/jwalk"
 )
 
 const input = `{
@@ -28,31 +29,42 @@ func main() {
 
 	switch v := i.(type) {
 	case jwalk.ObjectWalker:
-		v.Walk(func(key string, value interface{}) error {
+		v.Walk(func(key string, value interface{}) (interface{}, error) {
 			fmt.Println(key + ":")
 			switch v := value.(type) {
 			case jwalk.ObjectsWalker:
 				v.Walk(func(obj jwalk.ObjectWalker) error {
 					fmt.Println("\t-")
-					obj.Walk(func(key string, value interface{}) error {
+					obj.Walk(func(key string, value interface{}) (interface{}, error) {
 						if v, ok := value.(jwalk.Value); ok {
 							fmt.Println("\t", key+":", v.Interface())
+							if v.Int() == 2 {
+								fmt.Println("Found 2")
+								return jwalk.JSONMarshaler(3), nil
+							}
 						}
-						return nil
+						return value, nil
 					})
 					return nil
 				})
 			case jwalk.Value:
 				fmt.Println("\t", v.Interface())
 			case jwalk.ObjectWalker:
-				v.Walk(func(key string, value interface{}) error {
+				v.Walk(func(key string, value interface{}) (interface{}, error) {
 					if v, ok := value.(jwalk.Value); ok {
 						fmt.Println("\t", key+":", v.Interface())
 					}
-					return nil
+					return value, nil
 				})
 			}
-			return nil
+			return value, nil
 		})
 	}
+
+	b, err := json.Marshal(i)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Print(string(b))
 }
