@@ -8,6 +8,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var RemoveField = errors.New("delete this field")
+
 // ObjectWalker iterates through JSON object fields.
 type ObjectWalker interface {
 	Walk(func(name string, value interface{}) (string, interface{}, error)) error
@@ -28,6 +30,10 @@ type field struct {
 func (o *object) Walk(fn func(name string, value interface{}) (string, interface{}, error)) error {
 	for idx, f := range o.fields {
 		key, val, err := fn(f.name, f.value)
+		if err == RemoveField {
+			o.fields = append(o.fields[:idx], o.fields[idx+1:]...)
+			return nil
+		}
 		if err != nil {
 			return err
 		}
