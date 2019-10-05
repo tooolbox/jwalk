@@ -10,7 +10,7 @@ import (
 
 // ObjectWalker iterates through JSON object fields.
 type ObjectWalker interface {
-	Walk(func(name string, value interface{}) (interface{}, error)) error
+	Walk(func(name string, value interface{}) (string, interface{}, error)) error
 	json.Marshaler
 }
 
@@ -25,13 +25,14 @@ type field struct {
 	value interface{}
 }
 
-func (o *object) Walk(fn func(name string, value interface{}) (interface{}, error)) error {
+func (o *object) Walk(fn func(name string, value interface{}) (string, interface{}, error)) error {
 	for idx, f := range o.fields {
-		repl, err := fn(f.name, f.value)
+		key, val, err := fn(f.name, f.value)
 		if err != nil {
 			return err
 		}
-		o.fields[idx].value = repl
+		o.fields[idx].name = key
+		o.fields[idx].value = val
 	}
 
 	return nil
